@@ -7,9 +7,9 @@ import org.grobid.core.data.BiblioItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ua.kpi.analyzer.RegisterProcessor;
-import ua.kpi.analyzer.things.ADocument;
-import ua.kpi.analyzer.things.Author;
+import ua.kpi.analyzer.requests.RegisterProcessor;
+import ua.kpi.analyzer.entities.ADocument;
+import ua.kpi.analyzer.entities.Author;
 
 import java.util.*;
 import java.util.function.*;

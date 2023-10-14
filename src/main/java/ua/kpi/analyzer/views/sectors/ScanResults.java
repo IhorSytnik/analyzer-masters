@@ -9,8 +9,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import ua.kpi.analyzer.enums.Resource;
-import ua.kpi.analyzer.things.ADocument;
-import ua.kpi.analyzer.things.Author;
+import ua.kpi.analyzer.entities.ADocument;
+import ua.kpi.analyzer.entities.Author;
 import ua.kpi.analyzer.views.elements.ClauseVirtualListBasic;
 import ua.kpi.analyzer.views.elements.SubClauseVirtualListBasic;
 

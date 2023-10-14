@@ -1,23 +1,22 @@
-package ua.kpi.analyzer.things;
+package ua.kpi.analyzer.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.grobid.core.data.BiblioItem;
-import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ihor Sytnik
  */
 @Getter
 @Setter
+@JsonIgnoreProperties({"subClauses"})
 public class ADocument extends HasSubClauses implements ClassWithWarnings {
     private String path;
     private List<Paragraph> paragraphs;
@@ -70,35 +69,13 @@ public class ADocument extends HasSubClauses implements ClassWithWarnings {
     @AllArgsConstructor
     @Setter
     @Getter
-    @JsonSerialize(using = Paragraph.ParagraphSerializer.class)
     public static class Paragraph {
         private int lineNumber;
+        @JsonIgnore
         private XWPFParagraph textObject;
 
         public String getText() {
             return textObject.getText();
-        }
-
-//        @Component
-        public static class ParagraphSerializer extends StdSerializer<Paragraph> {
-
-            public ParagraphSerializer() {
-                this(null);
-            }
-
-            private ParagraphSerializer(Class<Paragraph> p) {
-                super(p);
-            }
-
-            @Override
-            public void serialize(
-                    Paragraph value, JsonGenerator gen, SerializerProvider provider
-            ) throws IOException {
-                gen.writeStartObject();
-                gen.writeNumberField("lineNumber", value.lineNumber);
-                gen.writeStringField("text", value.getText());
-                gen.writeEndObject();
-            }
         }
     }
 
@@ -115,10 +92,12 @@ public class ADocument extends HasSubClauses implements ClassWithWarnings {
         @JsonIgnore
         private BiblioItem processed;
 
+        @JsonIgnore
         public int getLineNumberFirst() {
             return paragraphs.get(0).getLineNumber();
         }
 
+        @JsonIgnore
         public int getLineNumberLast() {
             return paragraphs.get(paragraphs.size() - 1).getLineNumber();
         }
@@ -128,6 +107,7 @@ public class ADocument extends HasSubClauses implements ClassWithWarnings {
             warnings.add(str);
         }
 
+        @JsonIgnore
         public String getText() {
             StringBuilder stringBuilder = new StringBuilder();
 

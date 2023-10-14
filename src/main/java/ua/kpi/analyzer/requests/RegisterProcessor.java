@@ -1,11 +1,10 @@
-package ua.kpi.analyzer;
+package ua.kpi.analyzer.requests;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ua.kpi.analyzer.requests.HttpRequestBrowser;
-import ua.kpi.analyzer.things.Publication;
+import ua.kpi.analyzer.entities.Publication;
 
 import java.util.HashSet;
 import java.util.Set;

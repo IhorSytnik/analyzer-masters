@@ -6,8 +6,9 @@ import org.springframework.stereotype.Component;
 import ua.kpi.analyzer.enums.Resource;
 import ua.kpi.analyzer.parsers.RulesImplementation;
 import ua.kpi.analyzer.parsers.WordParser;
-import ua.kpi.analyzer.things.ADocument;
-import ua.kpi.analyzer.things.Author;
+import ua.kpi.analyzer.entities.Author;
+import ua.kpi.analyzer.requests.OrcidFinder;
+import ua.kpi.analyzer.requests.ScopusFinder;
 
 import java.io.IOException;
 import java.io.InputStream;

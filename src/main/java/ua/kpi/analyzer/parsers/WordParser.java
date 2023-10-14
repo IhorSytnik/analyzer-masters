@@ -5,7 +5,7 @@ import lombok.Setter;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ua.kpi.analyzer.things.ADocument;
+import ua.kpi.analyzer.entities.ADocument;
 
 import java.io.IOException;
 import java.io.InputStream;

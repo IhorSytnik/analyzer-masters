@@ -1,11 +1,10 @@
-package ua.kpi.analyzer;
+package ua.kpi.analyzer.requests;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ua.kpi.analyzer.requests.HttpRequestBrowser;
-import ua.kpi.analyzer.things.Work;
+import ua.kpi.analyzer.entities.Work;
 
 import java.io.IOException;
 import java.util.ArrayList;

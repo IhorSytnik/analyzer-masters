@@ -5,11 +5,13 @@ import org.grobid.core.factory.GrobidFactory;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.utilities.GrobidProperties;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
 import ua.kpi.analyzer.requests.HttpRequestBrowser;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,8 +32,7 @@ public class SpringConfig {
     public HttpRequestBrowser orcidRequestBrowser(
             @Value("${orcid.website}") String website,
             @Value("${orcid.sleep}") int sleepMilliseconds,
-            @Value("#{${orcid.headers}}") HttpHeaders headers)
-            throws IOException {
+            @Value("#{${orcid.headers}}") HttpHeaders headers) {
         return new HttpRequestBrowser(website, true, headers, sleepMilliseconds);
     }
 
@@ -40,8 +41,7 @@ public class SpringConfig {
             @Value("${scopus.api.website}") String website,
             @Value("${scopus.sleep}") int sleepMilliseconds,
             @Value("#{${scopus.headers}}") HttpHeaders headers,
-            @Value("#{${scopus.api.secret.headers}}") HttpHeaders scopusApiSecretHeaders
-    ) throws IOException {
+            @Value("#{${scopus.api.secret.headers}}") HttpHeaders scopusApiSecretHeaders) {
         HttpRequestBrowser scopusAPIRequestBrowser =
                 new HttpRequestBrowser(website, true, headers, sleepMilliseconds);
         scopusAPIRequestBrowser.addHeaders(scopusApiSecretHeaders);
@@ -52,14 +52,12 @@ public class SpringConfig {
     public HttpRequestBrowser registerRequestBrowser(
             @Value("${register.website}") String website,
             @Value("${register.sleep}") int sleepMilliseconds,
-            @Value("#{${register.headers}}") HttpHeaders headers)
-            throws IOException {
+            @Value("#{${register.headers}}") HttpHeaders headers) {
         return new HttpRequestBrowser(website, true, headers, sleepMilliseconds);
     }
 
     @Bean
-    public Engine grobidEngine(
-            @Value("${grobid.pGrobidHome}") String grobidHome) {
+    public Engine grobidEngine(@Value("${grobid.pGrobidHome}") String grobidHome) {
         GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(List.of(grobidHome));
         GrobidProperties.getInstance(grobidHomeFinder);
         return GrobidFactory.getInstance().createEngine();

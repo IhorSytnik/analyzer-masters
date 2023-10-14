@@ -3,7 +3,7 @@ package ua.kpi.analyzer.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.kpi.analyzer.Processor;
-import ua.kpi.analyzer.things.Author;
+import ua.kpi.analyzer.entities.Author;
 
 import java.io.FileInputStream;
 import java.io.IOException;

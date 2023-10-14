@@ -4,9 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ua.kpi.analyzer.services.FileProcessingService;
-import ua.kpi.analyzer.things.Author;
+import ua.kpi.analyzer.entities.Author;
 
 import java.io.IOException;
 
@@ -16,6 +17,7 @@ import java.io.IOException;
  * @author Ihor Sytnik
  */
 @Controller
+@Validated
 @RequestMapping(value = "/processing")
 public class FileProcessingController {
     @Autowired
@@ -30,7 +32,7 @@ public class FileProcessingController {
     @PostMapping
     @ResponseBody
     public ResponseEntity<Author> process(
-            @RequestParam @NotBlank(message = "File name may not be empty")
+            @RequestParam @NotBlank(message = "Parameter filename may not be empty")
                     String filename) {
         try {
             fileProcessingService.process(filename);

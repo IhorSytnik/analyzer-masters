@@ -16,20 +16,20 @@ public class SpecialtiesService {
     @Autowired
     private Set<String> specialtiesToCheckFor;
 
-    public boolean addSpecialty(String specialty) throws WrongFormatSpecialtyException {
-        if (!Pattern.compile("\\d{3}").asMatchPredicate().test(specialty)) {
+    public void addSpecialties(Set<String> specialties) throws WrongFormatSpecialtyException {
+        if (specialties.stream().anyMatch(s -> !Pattern.compile("\\d{3}").asMatchPredicate().test(s))) {
             throw new WrongFormatSpecialtyException("Specialty number should be a 3-digit code.");
         }
 
-        return specialtiesToCheckFor.add(specialty);
+        specialtiesToCheckFor.addAll(specialties);
     }
 
-    public boolean removeSpecialty(String specialty) throws WrongFormatSpecialtyException {
-        if (!Pattern.compile("\\d{3}").asMatchPredicate().test(specialty)) {
+    public void removeSpecialties(Set<String> specialties) throws WrongFormatSpecialtyException {
+        if (specialties.stream().anyMatch(s -> !Pattern.compile("\\d{3}").asMatchPredicate().test(s))) {
             throw new WrongFormatSpecialtyException("Specialty number should be a 3-digit code.");
         }
 
-        return specialtiesToCheckFor.remove(specialty);
+        specialtiesToCheckFor.removeAll(specialties);
     }
 
     public Set<String> getSpecialties() {

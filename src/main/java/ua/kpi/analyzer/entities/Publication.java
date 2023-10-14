@@ -1,4 +1,4 @@
-package ua.kpi.analyzer.things;
+package ua.kpi.analyzer.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,4 +1,4 @@
-package ua.kpi.analyzer.things;
+package ua.kpi.analyzer.entities;
 
 import java.util.Collection;
 

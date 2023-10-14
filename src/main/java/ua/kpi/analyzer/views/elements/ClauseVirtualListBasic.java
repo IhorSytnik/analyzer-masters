@@ -2,14 +2,13 @@ package ua.kpi.analyzer.views.elements;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.ElementFactory;
-import ua.kpi.analyzer.things.ADocument;
+import ua.kpi.analyzer.entities.ADocument;
 import ua.kpi.analyzer.views.Helping;
 
 import java.util.Collection;
