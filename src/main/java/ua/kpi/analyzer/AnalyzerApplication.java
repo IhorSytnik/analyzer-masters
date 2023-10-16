@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @Push
 public class AnalyzerApplication implements AppShellConfigurator {
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		SpringApplication.run(AnalyzerApplication.class, args);
 	}
 }

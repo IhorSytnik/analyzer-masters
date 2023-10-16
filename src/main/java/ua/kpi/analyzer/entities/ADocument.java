@@ -5,7 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.grobid.core.data.BiblioItem;
+import org.grobid.core.data.Date;
+import ua.kpi.analyzer.exceptions.IsNotACitationException;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -100,6 +103,39 @@ public class ADocument extends HasSubClauses implements ClassWithWarnings {
         @JsonIgnore
         public int getLineNumberLast() {
             return paragraphs.get(paragraphs.size() - 1).getLineNumber();
+        }
+
+        public boolean checkIfCitForThePastNYears(int years) {
+            if (!isCitation) {
+                throw new IsNotACitationException(
+                        "Subclause in clause %d on lines %d-%d isn't a citation.".formatted(
+                                clauseNumber,
+                                getLineNumberFirst(),
+                                getLineNumberLast()
+                        ));
+            }
+
+            Date pubDate = processed.getNormalizedPublicationDate();
+
+            if (pubDate != null) {
+                int pubY = pubDate.getYear();
+
+                LocalDate nYearsAgo = LocalDate.now();
+                nYearsAgo = nYearsAgo.minusYears(years);
+
+                if (pubY != -1) {
+                    int pubM = pubDate.getMonth();
+                    int pubD = pubDate.getDay();
+                    if (pubM != -1 && pubD != -1) {
+                        LocalDate publicationDate = LocalDate.of(pubY, pubM, pubD);
+
+                        return publicationDate.compareTo(nYearsAgo) > 0;
+                    }
+                    return pubY > nYearsAgo.getYear();
+                }
+            }
+            addWarning("Couldn't find publication date.");
+            return true;
         }
 
         @Override

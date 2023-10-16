@@ -3,7 +3,6 @@ package ua.kpi.analyzer.controllers;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ua.kpi.analyzer.services.SpecialtiesService;
@@ -17,10 +16,10 @@ import java.util.Set;
  *
  * @author Ihor Sytnik
  */
-@Controller
+@RestController
 @Validated
 @RequestMapping(value = "/specialties")
-public class SpecialtiesController {
+public class SpecialtiesRestController {
 
     @Autowired
     private SpecialtiesService specialtiesService;
@@ -31,7 +30,6 @@ public class SpecialtiesController {
      * @return specialties {@link Set}
      */
     @GetMapping
-    @ResponseBody
     public ResponseEntity<Set<String>> getSpecialties() {
         return ResponseEntity.ok(specialtiesService.getSpecialties());
     }
@@ -42,10 +40,9 @@ public class SpecialtiesController {
      * @param specialties {@link Set} of specialty numbers to add
      * @return specialties {@link Set}
      */
-    @PostMapping("/add")
-    @ResponseBody
+    @PostMapping(path = "/add")
     public ResponseEntity<Set<String>> addSpecialty(
-            @RequestParam @NotEmpty(message = "Parameter specialties may not be empty")
+            @RequestBody @NotEmpty(message = "Specialties set may not be empty")
                     Set<String> specialties) {
         specialtiesService.addSpecialties(specialties);
         return ResponseEntity.ok(specialtiesService.getSpecialties());
@@ -58,9 +55,8 @@ public class SpecialtiesController {
      * @return specialties {@link Set}
      */
     @DeleteMapping("/remove")
-    @ResponseBody
     public ResponseEntity<Set<String>> removeSpecialty(
-            @RequestParam @NotEmpty(message = "Parameter specialties may not be empty")
+            @RequestBody @NotEmpty(message = "Specialties set may not be empty")
                     Set<String> specialties) {
         specialtiesService.removeSpecialties(specialties);
         return ResponseEntity.ok(specialtiesService.getSpecialties());

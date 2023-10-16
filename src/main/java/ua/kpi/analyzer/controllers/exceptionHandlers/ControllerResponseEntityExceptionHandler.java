@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,6 +14,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import ua.kpi.analyzer.exceptions.WrongFormatSpecialtyException;
+import ua.kpi.analyzer.exceptions.WrongRuleSyntaxException;
 
 import java.util.Set;
 
@@ -32,6 +34,12 @@ public class ControllerResponseEntityExceptionHandler extends ResponseEntityExce
                 new HttpHeaders(), ex.getStatusCode(), request);
     }
 
+    @ExceptionHandler(value = { WrongRuleSyntaxException.class })
+    protected ResponseEntity<Object> handleWrongRuleSyntax(
+            WrongRuleSyntaxException ex, WebRequest request) {
+        return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     protected ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
         Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
@@ -47,10 +55,16 @@ public class ControllerResponseEntityExceptionHandler extends ResponseEntityExce
     }
 
     @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request) {
+        return handleExceptionInternal(ex, ex.getMessage(), headers, status, request);
+    }
+
+    @Override
     protected ResponseEntity<Object> handleMissingServletRequestParameter(
             MissingServletRequestParameterException ex, HttpHeaders headers,
             HttpStatusCode status, WebRequest request) {
-
         return handleExceptionInternal(ex, ex.getMessage(), headers, status, request);
     }
 }

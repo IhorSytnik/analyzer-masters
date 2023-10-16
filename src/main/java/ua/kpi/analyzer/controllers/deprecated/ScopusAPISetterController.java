@@ -1,4 +1,4 @@
-package ua.kpi.analyzer.controllers;
+package ua.kpi.analyzer.controllers.deprecated;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,8 +13,9 @@ import ua.kpi.analyzer.services.ScopusAPISetterService;
  *
  * @author Ihor Sytnik
  */
-@Controller
-@RequestMapping(value = "/scopus/api")
+//@Controller
+//@RequestMapping(value = "/scopus/api")
+@Deprecated
 public class ScopusAPISetterController {
     @Autowired
     private ScopusAPISetterService scopusAPISetterService;
@@ -30,8 +31,8 @@ public class ScopusAPISetterController {
      */
     @PostMapping("/set")
     @ResponseBody
-    public void addSpecialty(@RequestParam(required = false) String apikey,
-                             @RequestParam(required = false) String insttoken) {
+    public void setAPIKeyAndInsttoken(@RequestParam(required = false) String apikey,
+                                      @RequestParam(required = false) String insttoken) {
         scopusAPISetterService.setApiCredentials(apikey, insttoken);
     }
 }

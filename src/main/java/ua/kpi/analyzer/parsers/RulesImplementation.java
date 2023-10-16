@@ -7,6 +7,7 @@ import org.grobid.core.data.BiblioItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ua.kpi.analyzer.exceptions.WrongRuleSyntaxException;
 import ua.kpi.analyzer.requests.RegisterProcessor;
 import ua.kpi.analyzer.entities.ADocument;
 import ua.kpi.analyzer.entities.Author;
@@ -33,11 +34,20 @@ public class RulesImplementation {
 
     Set<Integer> citationNums;
 
+    @Getter
+    Map<Integer, List<String>> clauseRules = new HashMap<>();
+
     public RulesImplementation(
             @Autowired Set<Integer> citationNums,
             @Value("#{${clauses.rules}}") Map<Integer, List<String>> clauseRules) throws Exception {
 
         this.citationNums = citationNums;
+
+        putRules(clauseRules);
+    }
+
+    public void putRules(Map<Integer, List<String>> newRules) throws Exception {
+        clauseRules.putAll(newRules);
 
         for (var entryInt : clauseRules.entrySet()) {
             List<Consumer<ADocument>> predicateList = new ArrayList<>();
@@ -58,38 +68,61 @@ public class RulesImplementation {
         }
     }
 
-    private Consumer<ADocument> citation(int clauseNum) {
+    private Consumer<ADocument> citationsWithYears(int clauseNum, int lastYears) {
         return (document) -> {
             if (!document.hasClause(clauseNum))
                 return;
             for (var citation : document.getClause(clauseNum).getSubClauses()) {
-                BiblioItem itemBibIt = citation.getProcessed();
 
-                boolean result = author.checkIfScopusHasWork(itemBibIt);
-
-                if (!result) {
-                    citation.addWarning("This work wasn't found on Scopus.");
-
-                    try {
-                        Set<String> specialtiesFound =
-                                registerProcessor.getSpecialtiesFromRegister(author.getPublication(citation));
-                        result = specialtiesToCheckFor.stream().anyMatch(specialtiesFound::contains);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    if (!result) {
-                        citation.setPassed(false);
-                        citation.addWarning("The publication didn't pass the requirements " +
-                                "(the publication doesn't have proper specialties associated with it).");
-                    }
+                if (!citation.checkIfCitForThePastNYears(lastYears)) {
+                    citation.setPassed(false);
+                    citation.addWarning("This work wasn't published in the last %d years.".formatted(lastYears));
+                    continue;
                 }
+
+                singleCitation(citation);
             }
         };
     }
 
+    private Consumer<ADocument> citations(int clauseNum) {
+        return (document) -> {
+            if (!document.hasClause(clauseNum))
+                return;
+            for (var citation : document.getClause(clauseNum).getSubClauses()) {
+                singleCitation(citation);
+            }
+        };
+    }
+
+    private void singleCitation(ADocument.SubClause citation) {
+        BiblioItem itemBibIt = citation.getProcessed();
+
+        boolean result = author.checkIfScopusHasWork(itemBibIt);
+
+        if (!result) {
+            citation.addWarning("This work wasn't found on Scopus.");
+
+            try {
+                Set<String> specialtiesFound =
+                        registerProcessor.getSpecialtiesFromRegister(author.getPublication(citation));
+                result = specialtiesToCheckFor.stream().anyMatch(specialtiesFound::contains);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            if (!result) {
+                citation.setPassed(false);
+                citation.addWarning("The publication didn't pass the requirements " +
+                        "(the publication doesn't have proper specialties associated with it).");
+            }
+        }
+    }
+
     private Consumer<ADocument> minimum(int clauseNum, int minimum) {
         return (document) -> {
+            if (!document.hasClause(clauseNum))
+                return;
             ADocument.Clause clause = document.getClause(clauseNum);
 
             boolean result = clause.getSubClauses().size() >= minimum;
@@ -129,15 +162,18 @@ public class RulesImplementation {
         ),
         cit(
                 (str, rulesImpl, clauseNumber) -> {
+                    Matcher matcher = Pattern.compile("cit:L(\\d)y").matcher(str);
                     rulesImpl.citationNums.add(clauseNumber);
-                    return rulesImpl.citation(clauseNumber);
+                    if (matcher.find())
+                        return rulesImpl.citationsWithYears(clauseNumber, Integer.parseInt(matcher.group(1)));
+                    return rulesImpl.citations(clauseNumber);
                 }
         ),
         min(
                 (str, rulesImpl, clauseNumber) -> {
                     Matcher matcher = Pattern.compile("min:(\\d)").matcher(str);
                     if (!matcher.find())
-                        throw new Exception("Couldn't parse the min rule.");
+                        throw new WrongRuleSyntaxException("Couldn't parse the min rule.");
 
                     return rulesImpl.minimum(clauseNumber, Integer.parseInt(matcher.group(1)));
                 }
