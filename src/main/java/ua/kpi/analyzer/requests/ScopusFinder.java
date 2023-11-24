@@ -19,7 +19,7 @@ public class ScopusFinder {
     @Autowired
     private HttpRequestBrowser scopusAPIRequestBrowser;
 
-    public String getSearch(String authorId, int start, int count) throws InterruptedException {
+    private String getSearch(String authorId, int start, int count) {
         return scopusAPIRequestBrowser
                 .get(
                         "/content/search/scopus?query=au-id(%s)&start=%d&count=%d"
@@ -32,7 +32,7 @@ public class ScopusFinder {
     }
 
     public List<Work> getAuthorWorks(String authorId)
-            throws InterruptedException, IOException {
+            throws IOException {
 
         List<Work> results = new ArrayList<>();
         int start = -20;

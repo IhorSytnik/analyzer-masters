@@ -1,11 +1,8 @@
 package ua.kpi.analyzer.views.elements;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.virtuallist.VirtualList;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.ElementFactory;
 import ua.kpi.analyzer.entities.ADocument;
 import ua.kpi.analyzer.views.Helping;
@@ -15,31 +12,29 @@ import java.util.Collection;
 
 public class SubClauseVirtualListBasic extends Div {
 
-    private final ComponentRenderer<Component, ADocument.SubClause> subClauseComponentRenderer =
-        new ComponentRenderer<>(
+    private VerticalLayout subClauseComponentRenderer(ADocument.SubClause subClause) {
 
-            subClause -> {
-
-                VerticalLayout infoLayout = new VerticalLayout();
+        VerticalLayout infoLayout = new VerticalLayout();
 //                infoLayout.setSpacing(false);
 //                infoLayout.setPadding(false);
-                infoLayout.getElement().appendChild(
-                        ElementFactory.createDiv(subClause.getText()));
+        infoLayout.getElement().appendChild(
+                ElementFactory.createDiv(subClause.getText()));
 
-                if (!subClause.getWarnings().isEmpty()) {
-                    Helping.addWarningDetails(infoLayout, subClause, "SubClause warnings");
-                }
+        if (!subClause.getWarnings().isEmpty()) {
+            Helping.addWarningDetails(infoLayout, subClause);
+        }
 
-                infoLayout.add(new Hr());
+        infoLayout.add(new Hr());
 
-                return infoLayout;
-            });
+        return infoLayout;
+    }
 
     public void initialize(Collection<ADocument.SubClause> subClauseCollection) {
         removeAll();
-        VirtualList<ADocument.SubClause> list = new VirtualList<>();
-        list.setItems(subClauseCollection);
-        list.setRenderer(subClauseComponentRenderer);
+        VerticalLayout list = new VerticalLayout();
+        for (var subclause : subClauseCollection) {
+            list.add(subClauseComponentRenderer(subclause));
+        }
         add(list);
     }
 

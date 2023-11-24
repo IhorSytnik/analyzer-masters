@@ -19,7 +19,7 @@ public class RegisterProcessor {
     @Autowired
     private HttpRequestBrowser registerRequestBrowser;
 
-    private String getPageByISSN(String ISSN) throws InterruptedException {
+    private String getPageByISSN(String ISSN) {
         return registerRequestBrowser
                 .get(
                         "/search?issnSearch=%s"
@@ -44,13 +44,12 @@ public class RegisterProcessor {
         return specialties;
     }
 
-    private Set<String> getSpecialtiesByISSN(String ISSN) throws InterruptedException {
+    private Set<String> getSpecialtiesByISSN(String ISSN) {
         return getSpecialties(getPageByISSN(ISSN));
     }
 
-    public Set<String> getSpecialtiesFromRegister(Publication publication) throws InterruptedException {
+    public Set<String> getSpecialtiesFromRegister(Publication publication) {
         Set<String> specialties = new HashSet<>();
-        String html;
 
         if (publication.getIssn() != null) {
             specialties.addAll(getSpecialtiesByISSN(publication.getIssn()));

@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.grobid.core.data.BiblioItem;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ua.kpi.analyzer.exceptions.WrongRuleSyntaxException;
 import ua.kpi.analyzer.requests.RegisterProcessor;
@@ -29,26 +28,32 @@ public class RulesImplementation {
     private Map<Integer, List<Consumer<ADocument>>> ruleMap = new HashMap<>();
     @Autowired
     private RegisterProcessor registerProcessor;
-    @Autowired
+    @Setter
     private Set<String> specialtiesToCheckFor;
+    private Properties locText;
 
     Set<Integer> citationNums;
 
     @Getter
-    Map<Integer, List<String>> clauseRules = new HashMap<>();
+    Map<Integer, List<String>> clauseRules;
 
     public RulesImplementation(
             @Autowired Set<Integer> citationNums,
-            @Value("#{${clauses.rules}}") Map<Integer, List<String>> clauseRules) throws Exception {
+            @Autowired Map<Integer, List<String>> clauseRules,
+            @Autowired Properties locText) throws Exception {
 
+        this.locText = locText;
         this.citationNums = citationNums;
-
-        putRules(clauseRules);
+        this.clauseRules = clauseRules;
+        updateRules();
     }
 
     public void putRules(Map<Integer, List<String>> newRules) throws Exception {
         clauseRules.putAll(newRules);
+        updateRules();
+    }
 
+    public void updateRules() throws Exception {
         for (var entryInt : clauseRules.entrySet()) {
             List<Consumer<ADocument>> predicateList = new ArrayList<>();
             for (var r : entryInt.getValue()) {
@@ -74,9 +79,10 @@ public class RulesImplementation {
                 return;
             for (var citation : document.getClause(clauseNum).getSubClauses()) {
 
-                if (!citation.checkIfCitForThePastNYears(lastYears)) {
+                if (!citation.checkIfCitForThePastNYears(lastYears,
+                        locText.getProperty("warnings.citation.dateNotFound"))) {
                     citation.setPassed(false);
-                    citation.addWarning("This work wasn't published in the last %d years.".formatted(lastYears));
+                    citation.addWarning(locText.getProperty("warnings.citation.years").formatted(lastYears));
                     continue;
                 }
 
@@ -101,20 +107,15 @@ public class RulesImplementation {
         boolean result = author.checkIfScopusHasWork(itemBibIt);
 
         if (!result) {
-            citation.addWarning("This work wasn't found on Scopus.");
+            citation.addWarning(locText.getProperty("warnings.citation.scopus"));
 
-            try {
-                Set<String> specialtiesFound =
-                        registerProcessor.getSpecialtiesFromRegister(author.getPublication(citation));
-                result = specialtiesToCheckFor.stream().anyMatch(specialtiesFound::contains);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            Set<String> specialtiesFound =
+                    registerProcessor.getSpecialtiesFromRegister(author.getPublication(citation));
+            result = specialtiesToCheckFor.stream().anyMatch(specialtiesFound::contains);
 
             if (!result) {
                 citation.setPassed(false);
-                citation.addWarning("The publication didn't pass the requirements " +
-                        "(the publication doesn't have proper specialties associated with it).");
+                citation.addWarning(locText.getProperty("warnings.citation.publication"));
             }
         }
     }
@@ -129,7 +130,7 @@ public class RulesImplementation {
 
             if (!result) {
                 clause.setPassed(false);
-                clause.addWarning("This clause should have %d items at minimum".formatted(minimum));
+                clause.addWarning(locText.getProperty("warnings.minimum").formatted(minimum));
             }
         };
     }
@@ -140,7 +141,7 @@ public class RulesImplementation {
 
             if (!result) {
                 document.setPassed(false);
-                document.addWarning("Clause %d is required".formatted(clauseNum));
+                document.addWarning(locText.getProperty("warnings.required").formatted(clauseNum));
             }
         };
     }

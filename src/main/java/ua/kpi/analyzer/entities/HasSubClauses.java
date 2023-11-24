@@ -22,11 +22,6 @@ public abstract class HasSubClauses {
     }
 
     @JsonIgnore
-    public List<ADocument.SubClause> getNonPassed() {
-        return subClauses.stream().filter(ADocument.SubClause::isPassed).toList();
-    }
-
-    @JsonIgnore
     public List<ADocument.SubClause> getCitations() {
         return subClauses.stream().filter(ADocument.SubClause::isCitation).toList();
     }

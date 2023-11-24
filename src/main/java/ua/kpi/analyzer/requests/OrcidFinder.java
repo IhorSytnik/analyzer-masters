@@ -21,14 +21,14 @@ public class OrcidFinder {
     @Autowired
     private HttpRequestBrowser orcidRequestBrowser;
 
-    public String getPublicRecord(String orcid) throws InterruptedException {
+    private String getPublicRecord(String orcid) {
         return orcidRequestBrowser
                 .get(
                         "/%s/public-record.json".formatted(orcid)
                 ).bodyToMono(String.class).block();
     }
 
-    public String getWorksExtendedPage(String orcid, int offset, int pageSize) throws InterruptedException {
+    private String getWorksExtendedPage(String orcid, int offset, int pageSize) {
         return orcidRequestBrowser
                 .get(
                         "/%s/worksExtendedPage.json?offset=%d&sort=date&sortAsc=false&pageSize=%d"
@@ -40,8 +40,8 @@ public class OrcidFinder {
 
     }
 
-    public Map<Resource, String> getExternalIdentifiers(String orcid)
-            throws InterruptedException, JsonProcessingException {
+    private Map<Resource, String> getExternalIdentifiers(String orcid)
+            throws JsonProcessingException {
 
         Map<Resource, String> results = new HashMap<>();
         String jsonStr = getPublicRecord(orcid);
@@ -54,8 +54,8 @@ public class OrcidFinder {
         return results;
     }
 
-    public boolean identify(String orcid, Author author)
-            throws InterruptedException, JsonProcessingException {
+    private boolean identify(String orcid, Author author)
+            throws JsonProcessingException {
 
         for (var exIdsEntry : getExternalIdentifiers(orcid).entrySet()) {
             for (var foundIdsEntry : author.getIdentifiers().entrySet()) {
@@ -71,7 +71,7 @@ public class OrcidFinder {
 
     public String findAuthorsOrcid(
             Author author, List<ADocument.SubClause> processedSubClauses)
-            throws InterruptedException, JsonProcessingException {
+            throws JsonProcessingException {
 
         for (var bib : processedSubClauses) {
             List<Person> personList = bib.getProcessed().getFullAuthors();
@@ -88,7 +88,7 @@ public class OrcidFinder {
     }
 
     public Set<String> getAllWorks(String orcid)
-            throws InterruptedException, JsonProcessingException {
+            throws JsonProcessingException {
 
         Set<String> resultSet = new HashSet<>();
 

@@ -4,27 +4,32 @@ import org.grobid.core.engines.Engine;
 import org.grobid.core.factory.GrobidFactory;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.utilities.GrobidProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.http.HttpHeaders;
 import ua.kpi.analyzer.requests.HttpRequestBrowser;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author Ihor Sytnik
  */
 @Configuration
-@ComponentScan("ua.kpi.analyzer")
+@ComponentScan(basePackages = {"ua.kpi.analyzer"})
 @PropertySource({
         "classpath:project.properties",
         "classpath:secret.properties",
-        "classpath:grobid.properties"
+        "classpath:grobid.properties",
+        "classpath:view.properties"
+})
+@Import({
+        LocalisationENConfig.class,
+        LocalisationUAConfig.class
 })
 public class SpringConfig {
 
@@ -71,5 +76,10 @@ public class SpringConfig {
     @Bean
     public Set<Integer> citationNums() {
         return new HashSet<>();
+    }
+
+    @Bean
+    public Map<Integer, List<String>> clauseRules(@Value("#{${clauses.rules}}") Map<Integer, List<String>> clauseRules) {
+        return clauseRules;
     }
 }

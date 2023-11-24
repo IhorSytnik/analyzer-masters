@@ -20,12 +20,13 @@ import java.util.Map;
 @Getter
 @Setter
 @JsonIgnoreProperties({"subClauses"})
-public class ADocument extends HasSubClauses implements ClassWithWarnings {
-    private String path;
+public class ADocument extends HasSubClauses implements ContainsWarnings {
     private List<Paragraph> paragraphs;
     private Map<Integer, Clause> clauses = new HashMap<>();
     private final List<String> warnings = new ArrayList<>();
-    private boolean isPassed = true;
+    private boolean passed = true;
+    @JsonIgnore
+    private int justificationFirstNum = -1;
 
     public void addSubClause(int clauseNumber, SubClause subClause, boolean isCitation) {
         subClause.setClauseNumber(clauseNumber);
@@ -49,6 +50,17 @@ public class ADocument extends HasSubClauses implements ClassWithWarnings {
         return clauses.get(clauseNumber).getSubClauses();
     }
 
+    public List<String> getJustification() {
+        if (justificationFirstNum < 0)
+            return List.of();
+
+        List<String> strings = new ArrayList<>();
+        for (int i = justificationFirstNum; i < paragraphs.size(); i++) {
+            strings.add(paragraphs.get(i).getText());
+        }
+        return strings;
+    }
+
     @Override
     public void addWarning(String str) {
         warnings.add(str);
@@ -57,7 +69,7 @@ public class ADocument extends HasSubClauses implements ClassWithWarnings {
     @RequiredArgsConstructor
     @Setter
     @Getter
-    public static class Clause extends HasSubClauses implements ClassWithWarnings {
+    public static class Clause extends HasSubClauses implements ContainsWarnings {
         private final int clauseNumber;
         private final List<String> warnings = new ArrayList<>();
         private boolean passed = true;
@@ -86,7 +98,7 @@ public class ADocument extends HasSubClauses implements ClassWithWarnings {
     @NoArgsConstructor
     @Setter
     @Getter
-    public static class SubClause implements ClassWithWarnings {
+    public static class SubClause implements ContainsWarnings {
         private int clauseNumber;
         private List<Paragraph> paragraphs = new ArrayList<>();
         private final List<String> warnings = new ArrayList<>();
@@ -105,7 +117,7 @@ public class ADocument extends HasSubClauses implements ClassWithWarnings {
             return paragraphs.get(paragraphs.size() - 1).getLineNumber();
         }
 
-        public boolean checkIfCitForThePastNYears(int years) {
+        public boolean checkIfCitForThePastNYears(int years, String dateNotFoundStr) {
             if (!isCitation) {
                 throw new IsNotACitationException(
                         "Subclause in clause %d on lines %d-%d isn't a citation.".formatted(
@@ -134,7 +146,7 @@ public class ADocument extends HasSubClauses implements ClassWithWarnings {
                     return pubY > nYearsAgo.getYear();
                 }
             }
-            addWarning("Couldn't find publication date.");
+            addWarning(dateNotFoundStr);
             return true;
         }
 

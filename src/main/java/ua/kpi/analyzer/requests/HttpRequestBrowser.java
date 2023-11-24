@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.RateLimiter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -48,14 +47,14 @@ public class HttpRequestBrowser {
     }
 
     /**
-     * Makes a request to <b>uri</b>, with http method <b>method</b> and headers <b>headers</b>.
+     * Makes a request to <b>uri</b>, with http method <b>method</b> and body <b>body</b>.
      *
      * @param uri a URI the request should be sent to.
      * @param method http request method.
+     * @param body body of the request.
      * @return response.
      */
-    public WebClient.ResponseSpec request(String uri, HttpMethod method,
-                                          String body) {
+    public WebClient.ResponseSpec request(String uri, HttpMethod method, String body) {
         limiter.acquire();
         return client.method(method)
                 .uri(uri)
@@ -66,10 +65,6 @@ public class HttpRequestBrowser {
                 .retrieve();
     }
 
-    public void addHeaders(String headerName, @Nullable String headerValue) {
-        commonHeaders.add(headerName, headerValue);
-    }
-
     public void addHeaders(HttpHeaders headers) {
         commonHeaders.addAll(headers);
     }
@@ -78,8 +73,7 @@ public class HttpRequestBrowser {
         commonHeaders.setAll(headers);
     }
 
-    public WebClient.ResponseSpec post(String uri,
-                                       String body) throws InterruptedException {
+    public WebClient.ResponseSpec post(String uri, String body) {
         return request(uri, HttpMethod.POST, body);
     }
 
@@ -88,9 +82,8 @@ public class HttpRequestBrowser {
      *
      * @param uri an uri the request should be sent to.
      * @return response.
-     * @throws InterruptedException see {@link #request(String, HttpMethod, String)}.
      */
-    public WebClient.ResponseSpec get(String uri) throws InterruptedException {
+    public WebClient.ResponseSpec get(String uri) {
         return request(uri, HttpMethod.GET, "");
     }
 }

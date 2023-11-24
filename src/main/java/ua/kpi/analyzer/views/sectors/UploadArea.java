@@ -12,6 +12,7 @@ import ua.kpi.analyzer.Processor;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.Set;
 
 @SpringComponent
 public class UploadArea extends VerticalLayout {
@@ -22,6 +23,8 @@ public class UploadArea extends VerticalLayout {
     private ScanResults scanResults;
     @Autowired
     private Processor processor;
+    @Autowired
+    private Set<String> specialtiesToCheckFor;
 
     public UploadArea() {
         uploadField = new Upload(createFileReceiver());
@@ -59,10 +62,10 @@ public class UploadArea extends VerticalLayout {
                 PipedInputStream in = new PipedInputStream(out);
                 new Thread(() -> {
                     try {
-                        processor.process(in);
+                        processor.process(in, specialtiesToCheckFor);
 
                         scanResults.initializeResults(processor.getAuthor());
-                    } catch (IOException | InterruptedException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }).start();
@@ -80,12 +83,4 @@ public class UploadArea extends VerticalLayout {
         errorField.setText(message);
     }
 
-    class MyPiped extends PipedInputStream {
-
-        public MyPiped(PipedOutputStream src) throws IOException {
-            super(src);
-        }
-
-
-    }
 }

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -42,10 +43,12 @@ public class WordParser {
         document.close();
 
         setClauses();
+        setJustification();
     }
 
     private void setClauses() {
-        Pattern clausesPattern = Pattern.compile("^\\s*[пП]\\s*\\.?\\s*(\\d+)[^\\d]?\\s*");
+        Pattern clausesPattern = Pattern.compile("^\\s*п\\s*\\.?\\s*(\\d+)[^\\d]?\\s*",
+                Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
         String subclausesPatternString = "^\\s*%d\\s*\\.\\s*\\d+";
         Function<Integer, Pattern> subclausesPatternFunction = (c) ->
                 Pattern.compile(subclausesPatternString.formatted(c));
@@ -116,10 +119,52 @@ public class WordParser {
         }
     }
 
-    public String getScopusAuthorId() {
-        Pattern scopusAuthorPattern = Pattern.compile("scopus\\.com/authid/detail\\.uri\\?authorId=(\\d{11})");
+    private void setJustification() {
+        Pattern educationPattern = Pattern.compile("^\\s*освіта\\s*:",
+                Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        Pattern degreePattern = Pattern.compile("^\\s*науковий\\s*ступінь\\s*:",
+                Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        Pattern academicStatusPattern = Pattern.compile("^\\s*вчене\\s*звання\\s*:",
+                Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+
         for (var para : aDocument.getParagraphs()) {
-            Matcher matcher = scopusAuthorPattern.matcher(para.getText());
+            if (educationPattern.asPredicate().test(para.getText())) {
+                aDocument.setJustificationFirstNum(para.getLineNumber());
+                break;
+            } else if (degreePattern.asPredicate().test(para.getText())) {
+                aDocument.setJustificationFirstNum(para.getLineNumber());
+                break;
+            } else if (academicStatusPattern.asPredicate().test(para.getText())) {
+                aDocument.setJustificationFirstNum(para.getLineNumber());
+                break;
+            }
+        }
+    }
+
+    public String getPosition() {
+        return findByPattern(Pattern.compile("^\\s*посада\\s*:\\s*(.+)",
+                Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE));
+    }
+
+    public String getQualification() {
+        return findByPattern(Pattern.compile("^\\s*кваліфікація\\s*викладача\\s*:\\s*(.+)",
+                Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE));
+    }
+
+    public int getExperienceInYears() {
+        String result = findByPattern(Pattern.compile("^\\s*стаж\\s*:\\s*(\\d+)",
+                Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE));
+        return result.equals("") ? 0 : Integer.parseInt(result);
+    }
+
+    public String getScopusAuthorId() {
+        return findByPattern(Pattern.compile("scopus\\.com/authid/detail\\.uri\\?authorId=(\\d{11})"));
+    }
+
+    private String findByPattern(Pattern pattern) {
+        Matcher matcher;
+        for (var para : aDocument.getParagraphs()) {
+            matcher = pattern.matcher(para.getText());
             if (matcher.find()) {
                 return matcher.group(1);
             }

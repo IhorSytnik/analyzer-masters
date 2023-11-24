@@ -19,7 +19,7 @@ import java.util.Set;
 @RestController
 @Validated
 @RequestMapping(value = "/specialties")
-public class SpecialtiesRestController {
+public class SpecialtiesController {
 
     @Autowired
     private SpecialtiesService specialtiesService;

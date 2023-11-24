@@ -1,67 +1,72 @@
 package ua.kpi.analyzer.views.elements;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.virtuallist.VirtualList;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.ElementFactory;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import ua.kpi.analyzer.entities.ADocument;
 import ua.kpi.analyzer.views.Helping;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
-
+@AllArgsConstructor
 public class ClauseVirtualListBasic extends Div {
 
-    private final ComponentRenderer<Component, ADocument.Clause> clauseCardRenderer = new ComponentRenderer<>(
-            clause -> {
-                VerticalLayout cardLayout = new VerticalLayout();
+    @Autowired
+    private Properties locText;
+
+    private VerticalLayout clauseCardRenderer(ADocument.Clause clause) {
+        VerticalLayout cardLayout = new VerticalLayout();
 //                cardLayout.setMargin(true);
 
-                VerticalLayout infoLayout = new VerticalLayout();
+        VerticalLayout infoLayout = new VerticalLayout();
 //                infoLayout.setSpacing(false);
 //                infoLayout.setPadding(false);
-                infoLayout.getElement().appendChild(
-                        ElementFactory.createStrong("Clause №%d - %s".formatted(
-                                clause.getClauseNumber(),
-                                clause.isPassed() ? "passed" : "didn't pass"
-                        )));
+        infoLayout.getElement().appendChild(
+                ElementFactory.createStrong(locText.getProperty("ui.results.clauseList.header").formatted(
+                        clause.getClauseNumber(),
+                        clause.isPassed() ?
+                                locText.getProperty("ui.results.clauseList.passed") :
+                                locText.getProperty("ui.results.clauseList.notPassed")
+                )));
 
-                /*Clause warnings*/
-                if (!clause.getWarnings().isEmpty()) {
-                    Helping.addWarningDetails(infoLayout, clause, "Clause warnings");
-                }
+        /*Clause warnings*/
+        if (!clause.getWarnings().isEmpty()) {
+            Helping.addWarningDetails(infoLayout, clause);
+        }
 
-                /*Subclauses*/
-                List<ADocument.SubClause> subClauses = clause.getNonPassedNonCitations();
-                if (!subClauses.isEmpty()) {
+        /*Subclauses*/
+        List<ADocument.SubClause> subClauses = clause.getNonPassedNonCitations();
+        if (!subClauses.isEmpty()) {
 
-                    VerticalLayout subClauseLayout = new VerticalLayout();
-                    for (var sc : subClauses) {
-                        subClauseLayout.add(new Div(new Text(sc.getText())));
-                        /*Subclause warnings*/
-                        Helping.addWarningDetails(
-                                subClauseLayout,
-                                sc,
-                                "Subclause warnings");
-                    }
-                    infoLayout.add(new Div(subClauseLayout));
-                }
+            VerticalLayout subClauseLayout = new VerticalLayout();
+            for (var sc : subClauses) {
+                subClauseLayout.add(new Div(new Text(sc.getText())));
+                /*Subclause warnings*/
+                Helping.addWarningDetails(
+                        subClauseLayout,
+                        sc
+                );
+            }
+            infoLayout.add(new Div(subClauseLayout));
+        }
 
-                cardLayout.add(infoLayout, new Hr());
+        cardLayout.add(infoLayout, new Hr());
 
-                return cardLayout;
-            });
+        return cardLayout;
+    }
 
     public void initialize(Collection<ADocument.Clause> clauseList) {
         removeAll();
-        VirtualList<ADocument.Clause> list = new VirtualList<>();
-        list.setItems(clauseList);
-        list.setRenderer(clauseCardRenderer);
+        VerticalLayout list = new VerticalLayout();
+        for (var clause : clauseList) {
+            list.add(clauseCardRenderer(clause));
+        }
         add(list);
     }
 

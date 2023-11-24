@@ -12,6 +12,7 @@ import ua.kpi.analyzer.requests.ScopusFinder;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 
 /**
  * @author Ihor Sytnik
@@ -31,14 +32,17 @@ public class Processor {
 
     private final Author author = new Author();
 
-    public void process(InputStream inputStream)
-            throws IOException, InterruptedException {
+    public void process(InputStream inputStream, Set<String> specialtiesToCheckFor)
+            throws IOException {
         initialize();
 
         wordParser.setADocument(author.getADocument());
         wordParser.setParagraphs(inputStream);
 
         author.addIdentifier(Resource.SCOPUS, wordParser.getScopusAuthorId());
+        author.setPosition(wordParser.getPosition());
+        author.setQualification(wordParser.getQualification());
+        author.setExperienceInYears(wordParser.getExperienceInYears());
         author.addIdentifier(Resource.ORCID,
                 orcidFinder.findAuthorsOrcid(author, author.getADocument().getCitations()));
 
@@ -47,13 +51,9 @@ public class Processor {
                     getAuthorWorks(author.getIdentifier(Resource.SCOPUS)));
         }
 
+        rulesImplementation.setSpecialtiesToCheckFor(specialtiesToCheckFor);
         rulesImplementation.setAuthor(author);
         rulesImplementation.validate();
-
-    }
-
-    public String getAuthorsId(Resource resource) {
-        return author.getIdentifier(resource);
     }
 
     private void initialize() {
