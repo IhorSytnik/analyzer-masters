@@ -36,6 +36,5 @@ build/
 .mvn/
 mvnw
 
-/src/main/resources/secret.properties
 /grobid/
 /frontend/
